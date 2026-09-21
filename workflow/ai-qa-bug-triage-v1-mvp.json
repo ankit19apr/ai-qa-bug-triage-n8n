@@ -1,0 +1,627 @@
+{
+  "name": "AI QA Bug Triage Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-qa-bug",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "914b9789-609c-430c-8cf0-151d7f093dce",
+      "name": "Webhook",
+      "webhookId": "7d029939-0f2d-4995-bf8a-42d9198d602e"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "94da26b2-c5fa-49bc-bee5-71ad25323484",
+              "name": "bugTitle",
+              "value": "={{ $json.body.title }}",
+              "type": "string"
+            },
+            {
+              "id": "76913563-3a84-436d-b8a7-60bb6bccb4b4",
+              "name": "description",
+              "value": "={{ $json.body.description }}",
+              "type": "string"
+            },
+            {
+              "id": "c9af5585-688d-481d-b69b-4cfbc5a60516",
+              "name": "expectedResult",
+              "value": "={{ $json.body.expected }}",
+              "type": "string"
+            },
+            {
+              "id": "f84ece8f-b940-430f-bbd7-827bb7231756",
+              "name": "actualResult",
+              "value": "={{ $json.body.actual }}",
+              "type": "string"
+            },
+            {
+              "id": "72efe1c3-e159-471a-b828-0bc4995f8c2a",
+              "name": "environment",
+              "value": "={{ $json.body.environment }}",
+              "type": "string"
+            },
+            {
+              "id": "31eb9ab2-c276-444b-b699-f10c6e432e19",
+              "name": "steps",
+              "value": "={{ $json.body.steps }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "cdc36bcc-506d-4202-b7cd-19ab1768bf15",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert QA engineer performing bug triage.\n\nAnalyze the following bug report.\n\nBug Title:\n{{ $json.bugTitle }}\n\nDescription:\n{{ $json.description }}\n\nSteps to Reproduce:\n{{ $json.steps }}\n\nExpected Result:\n{{ $json.expectedResult }}\n\nActual Result:\n{{ $json.actualResult }}\n\nEnvironment:\n{{ $json.environment }}\n\nDetermine:\n1. Bug category\n2. Severity\n3. Priority\n4. Component\n5. A concise bug summary\n6. Whether the information provided is sufficient for investigation\n\nReturn the result in a clear structured format.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        96
+      ],
+      "id": "3b2d0a83-0d71-463e-8e46-a60ba8b42009",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        256
+      ],
+      "id": "b1e0a26e-413c-4b28-bd46-c7ddce08b6f1",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"category\": \"Functional\",\n  \"severity\": \"High\",\n  \"priority\": \"High\",\n  \"component\": \"Login\",\n  \"summary\": \"Login button does not respond after valid credentials\",\n  \"investigationReady\": true\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        240
+      ],
+      "id": "c462e62b-c163-4352-aab3-d2959d4e9897",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c58fb581-ab87-4b07-a6f9-412dda69db97",
+              "name": "category",
+              "value": "Functional",
+              "type": "string"
+            },
+            {
+              "id": "dfff8214-662b-4979-8456-234e2551c06c",
+              "name": "severity",
+              "value": "High",
+              "type": "string"
+            },
+            {
+              "id": "8c41b215-93e2-49a3-973d-a7dddf560517",
+              "name": "priority",
+              "value": "High",
+              "type": "string"
+            },
+            {
+              "id": "4573848c-e69b-4681-8275-c3a92aec4792",
+              "name": "component",
+              "value": "Login",
+              "type": "string"
+            },
+            {
+              "id": "9d6830aa-058f-4cf3-bb98-5deefd9fbeb7",
+              "name": "summary",
+              "value": "Login button does not respond after valid credentials",
+              "type": "string"
+            },
+            {
+              "id": "cd19947a-3551-4c31-a6c7-529a2893eba6",
+              "name": "investigationReady",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        816,
+        0
+      ],
+      "id": "2a0d726b-a9ac-425b-a818-ac772cde12e1",
+      "name": "Mock AI Triage Result"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Simulated existing bugs\nconst existingBugs = [\n  {\n    bugTitle: \"Login button not working\",\n    component: \"Login\"\n  },\n  {\n    bugTitle: \"Checkout page loading slowly\",\n    component: \"Checkout\"\n  },\n  {\n    bugTitle: \"Password reset email not received\",\n    component: \"Forgot Password\"\n  }\n];\n\nreturn items.map(item => {\n  const bug = item.json;\n\n  const duplicate = existingBugs.some(existing =>\n    existing.bugTitle.toLowerCase() === bug.bugTitle.toLowerCase() &&\n    existing.component.toLowerCase() === bug.component.toLowerCase()\n  );\n\n  return {\n    json: {\n      ...bug,\n      duplicateFound: duplicate,\n      duplicateStatus: duplicate ? \"DUPLICATE\" : \"NEW\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "4b2bbdcd-0032-40dc-aed3-74cd5d8f7d24",
+      "name": "Duplicate Check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f5cc33fa-2376-4279-8109-5c88f07525e2",
+              "leftValue": "={{ $json.duplicateFound }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1264,
+        0
+      ],
+      "id": "327a5531-bd98-4864-9747-9f5895cc96de",
+      "name": "is Duplicate?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8c776169-f5f4-4d64-9588-e1e9f01e137a",
+              "name": "action",
+              "value": "DUPLICATE_DETECTED",
+              "type": "string"
+            },
+            {
+              "id": "c1938709-64ae-4259-a7fd-88d2524bbe8b",
+              "name": "message",
+              "value": "A duplicate bug was detected. No new Jira ticket should be created.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1488,
+        -96
+      ],
+      "id": "7f8b8c72-b210-46be-8614-cd6670f83283",
+      "name": "Handle Duplicate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e18eeeb7-b3b5-42e1-ad99-3d1c4658f83a",
+              "name": "action",
+              "value": "CREATE_NEW_BUG",
+              "type": "string"
+            },
+            {
+              "id": "8c566043-08fb-4d5f-bfd2-e540e8272b73",
+              "name": "jiraSummary",
+              "value": "={{ $json.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "865d8fd1-1231-429e-a164-a5f1352fea1a",
+              "name": "jiraDescription",
+              "value": "=Bug Description: {{ $json.description }}  Steps to Reproduce: {{ $json.steps.join('\\n') }}  Expected Result: {{ $json.expectedResult }}  Actual Result: {{ $json.actualResult }}  Environment: {{ $json.environment }}  Category: {{ $json.category }} Severity: {{ $json.severity }} Priority: {{ $json.priority }} Component: {{ $json.component }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1488,
+        96
+      ],
+      "id": "aad50197-b151-4c33-935d-3bac61328e5d",
+      "name": "Prepare New Bug"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a514d6ee-fefb-47ad-a7c0-8801f78db749",
+              "name": "jiraKey",
+              "value": "QA-1001",
+              "type": "string"
+            },
+            {
+              "id": "4f59f882-2861-4904-a77a-b545f06db7df",
+              "name": "status",
+              "value": "CREATED",
+              "type": "string"
+            },
+            {
+              "id": "b9e97744-95fa-47dc-acd2-5fbd4e0b8698",
+              "name": "project",
+              "value": "QA",
+              "type": "string"
+            },
+            {
+              "id": "aaa48fcd-68e3-4f56-b171-5f255b671cbd",
+              "name": "message",
+              "value": "Jira bug created successfully (MOCK)",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1712,
+        96
+      ],
+      "id": "0726ada2-6564-43f3-b4da-6b838a282b93",
+      "name": "Mock Jira Create"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "986ba5be-7493-4ecc-acbb-c9afe2eea553",
+              "name": "result",
+              "value": "NEW_BUG_CREATED",
+              "type": "string"
+            },
+            {
+              "id": "b69bb62d-1be8-440a-afb7-5ec894bf3793",
+              "name": "jiraKey",
+              "value": "={{ $json.jiraKey }}",
+              "type": "string"
+            },
+            {
+              "id": "9b1bca3f-b6b7-4f32-ab62-2ef21f583f8e",
+              "name": "severity",
+              "value": "={{ $json.severity }}",
+              "type": "string"
+            },
+            {
+              "id": "2085ba44-7bee-49c5-9c2c-c7c90e2a30ff",
+              "name": "priority",
+              "value": "={{ $json.priority }}",
+              "type": "string"
+            },
+            {
+              "id": "6becfeed-643e-4639-bd43-1dcd14a3efcf",
+              "name": "summary",
+              "value": "={{ $json.jiraSummary }}",
+              "type": "string"
+            },
+            {
+              "id": "881f64f3-3d0f-4801-8367-f9896cd09ed0",
+              "name": "message",
+              "value": "Bug created successfully",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1936,
+        96
+      ],
+      "id": "9d36f18b-ea61-4327-806e-5986c62eb9e6",
+      "name": "Final Response - New Bug"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aa310903-e115-4de1-b604-2a63e0a56760",
+              "name": "result",
+              "value": "DUPLICATE",
+              "type": "string"
+            },
+            {
+              "id": "268b4db2-49db-4b51-847b-d620c3aaf7f5",
+              "name": "jiraKey",
+              "value": "DUPLICATE_NOT_CREATED",
+              "type": "string"
+            },
+            {
+              "id": "ec3329f8-7c52-49e5-8bb6-2b752dc9c534",
+              "name": "severity",
+              "value": "={{ $json.severity }}",
+              "type": "string"
+            },
+            {
+              "id": "4b630e1e-2b94-49c3-a752-39b722315a96",
+              "name": "priority",
+              "value": "={{ $json.priority }}",
+              "type": "string"
+            },
+            {
+              "id": "6a22623b-451c-4d2c-9f0f-5fe6069178a9",
+              "name": "summary",
+              "value": "={{ $json.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "26856e0c-d39e-4ab2-8fa0-578f92cf9b0c",
+              "name": "message",
+              "value": "Duplicate bug detected. No new Jira ticket created.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1712,
+        -96
+      ],
+      "id": "b50a1570-d383-43f2-897d-fde3f8c95d4d",
+      "name": "Final Response - Duplicate"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1936,
+        -96
+      ],
+      "id": "f9d673af-4d0d-4842-a5ba-13df61512945",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2160,
+        96
+      ],
+      "id": "7503f95d-737f-4a5a-b4bf-fa72bcb93c39",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Mock AI Triage Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Mock AI Triage Result": {
+      "main": [
+        [
+          {
+            "node": "Duplicate Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplicate Check": {
+      "main": [
+        [
+          {
+            "node": "is Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "is Duplicate?": {
+      "main": [
+        [
+          {
+            "node": "Handle Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare New Bug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare New Bug": {
+      "main": [
+        [
+          {
+            "node": "Mock Jira Create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock Jira Create": {
+      "main": [
+        [
+          {
+            "node": "Final Response - New Bug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Final Response - Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Response - Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Response - New Bug": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "cd6facfa-d8cb-4111-a9ca-fce86787fdfa",
+  "meta": {
+    "instanceId": "5e18449df403c57c7c54d5c112f440425900f6dddf9ca5f6a041ca51563c99c3"
+  },
+  "nodeGroups": [],
+  "id": "Lhh8MiNILOApm07a",
+  "tags": []
+}
